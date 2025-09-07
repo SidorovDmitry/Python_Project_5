@@ -1,0 +1,53 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-circle"></i> Профиль пользователя</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong><i class="bi bi-envelope"></i> Email:</strong>
+                                <p class="fs-5">{{ user.email }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong><i class="bi bi-person"></i> Имя пользователя:</strong>
+                                <p class="fs-5">{{ user.username }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong><i class="bi bi-person"></i> Имя:</strong>
+                                <p class="fs-5">{{ user.first_name|default:"Не указано" }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong><i class="bi bi-person"></i> Фамилия:</strong>
+                                <p class="fs-5">{{ user.last_name|default:"Не указана" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{% url 'users:profile_edit' %}" class="btn btn-primary me-2">
+                            <i class="bi bi-pencil"></i> Редактировать профиль
+                        </a>
+                        <a href="{% url 'users:password_change' %}" class="btn btn-warning">
+                            <i class="bi bi-key"></i> Сменить пароль
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
