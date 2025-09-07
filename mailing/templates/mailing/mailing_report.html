@@ -1,0 +1,39 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Отчеты по рассылкам{% endblock %}
+
+{% block content %}
+<h2>Отчеты по рассылкам</h2>
+{% if mailings %}
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Тема сообщения</th>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+            <th>Статус</th>
+            <th>Успешные попытки</th>
+            <th>Неуспешные попытки</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mailing in mailings %}
+        <tr>
+            <td>{{ mailing.message.subject }}</td>
+            <td>{{ mailing.start_time|date:"Y-m-d H:i:s" }}</td>
+            <td>{{ mailing.end_time|date:"Y-m-d H:i:s" }}</td>
+            <td>
+                {% if mailing.status == 'created' %}Создана{% endif %}
+                {% if mailing.status == 'started' %}<span class="text-warning">Запущена</span>{% endif %}
+                {% if mailing.status == 'completed' %}<span class="text-muted">Завершена</span>{% endif %}
+            </td>
+            <td>{{ mailing.mailingattempt_set.filter(status='success').count }}</td>
+            <td>{{ mailing.mailingattempt_set.filter(status='failed').count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Нет рассылок.</p>
+{% endif %}
+{% endblock %}

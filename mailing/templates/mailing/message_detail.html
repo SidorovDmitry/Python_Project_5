@@ -1,0 +1,35 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Детали рассылки{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Рассылка: {{ mailing.message.subject }}</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Статус:</strong>
+                {% if mailing.status == 'created' %}<span class="badge bg-secondary">Создана</span>{% endif %}
+                {% if mailing.status == 'started' %}<span class="badge bg-warning">Запущена</span>{% endif %}
+                {% if mailing.status == 'completed' %}<span class="badge bg-success">Завершена</span>{% endif %}
+            </p>
+            <p><strong>Дата начала:</strong> {{ mailing.start_time|date:"Y-m-d H:i:s" }}</p>
+            <p><strong>Дата окончания:</strong> {{ mailing.end_time|date:"Y-m-d H:i:s" }}</p>
+            <p><strong>Сообщение:</strong> {{ mailing.message.subject }}</p>
+            <p><strong>Получатели:</strong> {{ mailing.recipients.count }}</p>
+        </div>
+    </div>
+
+    {% if mailing.status != 'completed' %}
+    <form method="post" action="{% url 'mailing:send_mailing' mailing.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Отправить рассылку</button>
+    </form>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-warning">Редактировать</a>
+        <a href="{% url 'mailing:mailing_list' %}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+</div>
+{% endblock %}
