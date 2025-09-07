@@ -2,7 +2,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import send_mail
 
-from config.settings import CACHE_ENABLED
+# Правильный импорт настроек
+from django.conf import settings
 
 from .models import Mailing, MailingAttempt, Message, Recipient
 
@@ -17,7 +18,13 @@ def send_email(recipient_email, subject, body):
     :return: Кортеж (успешно: bool, ответ сервера: str)
     """
     try:
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient_email])
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient_email],
+            fail_silently=False,
+        )
         return True, None
     except Exception as e:
         return False, str(e)
@@ -38,7 +45,11 @@ def perform_mailing(mailing_id):
         mailing.save()
 
         for recipient in mailing.recipients.all():
-            success, response = send_email(recipient.email, mailing.message.subject, mailing.message.body)
+            success, response = send_email(
+                recipient.email,
+                mailing.message.subject,
+                mailing.message.body
+            )
             MailingAttempt.objects.create(
                 status="success" if success else "failed",
                 server_response=response if not success else None,
@@ -47,6 +58,9 @@ def perform_mailing(mailing_id):
 
         mailing.status = "completed"
         mailing.save()
+
+    except Mailing.DoesNotExist:
+        print(f"Рассылка с ID {mailing_id} не найдена")
     except Exception as e:
         print(f"Error during mailing: {e}")
 
@@ -58,7 +72,10 @@ def get_recipients_from_cache(user=None):
     :param user: Пользователь для фильтрации (опционально)
     :return: QuerySet получателей
     """
-    if not CACHE_ENABLED:
+    # Получаем настройку кэша из settings
+    cache_enabled = getattr(settings, 'CACHE_ENABLED', False)
+
+    if not cache_enabled:
         if user and not user.is_staff:
             return Recipient.objects.filter(owner=user)
         return Recipient.objects.all()
@@ -87,7 +104,10 @@ def get_messages_from_cache(user=None):
     :param user: Пользователь для фильтрации (опционально)
     :return: QuerySet сообщений
     """
-    if not CACHE_ENABLED:
+    # Получаем настройку кэша из settings
+    cache_enabled = getattr(settings, 'CACHE_ENABLED', False)
+
+    if not cache_enabled:
         if user and not user.is_staff:
             return Message.objects.filter(owner=user)
         return Message.objects.all()
